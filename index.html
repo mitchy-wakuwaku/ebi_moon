@@ -161,12 +161,21 @@ function startOrJump() {
   if (state === "title") {
     state = "play";
 
-    // ユーザー操作に紐づけて BGM2 を準備
-    bgm2.play().then(() => {
-      bgm2.pause();
-      bgm2.currentTime = 0;
-    }).catch(e => console.log("BGM2準備できず:", e));
+    // ユーザー操作に紐づけて BGM2 のロックを解除
+    const playPromise = bgm2.play();
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => {
+          // 再生できたけど、すぐに止める
+          bgm2.pause();
+          bgm2.currentTime = 0;  // タイミングをリセット
+        })
+        .catch(e => {
+          console.log("BGM2準備できず:", e);
+        });
+    }
 
+    // BGM1 は従来通りスタート
     bgm1.play();
     return;
   }
