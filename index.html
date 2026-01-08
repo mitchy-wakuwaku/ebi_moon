@@ -49,47 +49,23 @@ bgm1.loop = true;
 bgm2.loop = true;
 
 // ===== 画像 =====
-const ebiImg = new Image();
-ebiImg.src = "ebi.png";
+const ebiImg = new Image(); ebiImg.src = "ebi.png";
+const logoImg = new Image(); logoImg.src = "GinxDOTOWN.png";
+const ufoImg = new Image(); ufoImg.src = "UFO.png";
+const earthImg = new Image(); earthImg.src = "earth.png";
+const starImg = new Image(); starImg.src = "star.png";
 
-const logoImg = new Image();
-logoImg.src = "GinxDOTOWN.png";
+const makiImgs = ["maki_ikura.png","maki_kanpyo.png","maki_kappa.png","maki_takuan.png","maki_tekka.png"].map(s => { const i = new Image(); i.src = s; return i; });
+const sushiImgs = ["sushi_ika.png","sushi_maguro.png","sushi_tamago.png","sushi_uni.png"].map(s => { const i = new Image(); i.src = s; return i; });
 
-const ufoImg = new Image();
-ufoImg.src = "UFO.png";
-
-const earthImg = new Image();
-earthImg.src = "earth.png";
-
-const starImg = new Image();
-starImg.src = "star.png";
-
-const makiImgs = [
-  "maki_ikura.png","maki_kanpyo.png","maki_kappa.png",
-  "maki_takuan.png","maki_tekka.png"
-].map(s => { const i = new Image(); i.src = s; return i; });
-
-const sushiImgs = [
-  "sushi_ika.png","sushi_maguro.png",
-  "sushi_tamago.png","sushi_uni.png"
-].map(s => { const i = new Image(); i.src = s; return i; });
-
-const sparkleImg = new Image();
-sparkleImg.src = "kirakira1.png";
+const sparkleImg = new Image(); sparkleImg.src = "kirakira1.png";
 
 // ===== ユーティリティ：縦横比固定描画 =====
 function drawImageKeepRatio(img, x, y, maxSize) {
   const r = img.width / img.height;
   let w, h;
-
-  if (r > 1) {
-    w = maxSize;
-    h = maxSize / r;
-  } else {
-    h = maxSize;
-    w = maxSize * r;
-  }
-
+  if (r > 1) { w = maxSize; h = maxSize / r; } 
+  else { h = maxSize; w = maxSize * r; }
   ctx.drawImage(img, x - w / 2, y - h / 2, w, h);
 }
 
@@ -131,26 +107,15 @@ function init() {
 
   stars = [];
   for (let i = 0; i < 200; i++) {
-    stars.push({
-      x: Math.random() * canvas.width,
-      y: Math.random() * 6000,
-      size: Math.random() * 2 + 1
-    });
+    stars.push({ x: Math.random() * canvas.width, y: Math.random() * 6000, size: Math.random() * 2 + 1 });
   }
 
   sparkles = [];
   restartBtn.style.display = "none";
 
-  // UFO：コース中間地点
+  // UFO
   const midIndex = Math.floor(COURSE_LENGTH / 2);
-  ufo = {
-    baseX: 40,
-    x: 40,
-    y: plates[midIndex].y - 60,
-    float: 0,
-    sway: 0
-  };
-
+  ufo = { baseX: 40, x: 40, y: plates[midIndex].y - 60, float: 0, sway: 0 };
   ufoAppeared = false;
   jumpAfterUfo = 0;
   shootingStars = [];
@@ -163,43 +128,29 @@ function startOrJump() {
     bgm1.play();
     return;
   }
-    
-  if (!ebi.jumping && state === "play") {
 
-    // 流れ星
+  if (state === "ending4") {
+    // タップで月の正体＆BGM2再生
+    state = "ending5";
+    message = "そうか……ここは銀のさらだったんだ……";
+    const promise = bgm2.play();
+    if (promise !== undefined) promise.catch(e => console.log("スマホでBGM2再生できず:", e));
+    return;
+  }
+
+  if (!ebi.jumping && state === "play") {
     if (ufoAppeared && shootingStars.length === 0) {
       jumpAfterUfo++;
-
       if (jumpAfterUfo === 5) {
-        shootingStars.push({
-          x: canvas.width + 40,
-          y: -40,
-          vx: -8,
-          vy: 8,
-          life: 80
-        });
-        shootingStars.push({
-          x: canvas.width + 80,
-          y: -20,
-          vx: -8,
-          vy: 8,
-          life: 60
-        });
+        shootingStars.push({ x: canvas.width + 40, y: -40, vx: -8, vy: 8, life: 80 });
+        shootingStars.push({ x: canvas.width + 80, y: -20, vx: -8, vy: 8, life: 60 });
       }
     }
 
-    const se = new Audio("jump.mp3");
-    se.volume = 0.8;
-    se.play();
-
+    const se = new Audio("jump.mp3"); se.volume = 0.8; se.play();
     ebi.vy = JUMP_POWER;
     ebi.jumping = true;
-
-    sparkles.push({
-      x: ebi.x + ebi.w / 2,
-      y: ebi.y + ebi.h,
-      life: 30
-    });
+    sparkles.push({ x: ebi.x + ebi.w / 2, y: ebi.y + ebi.h, life: 30 });
   }
 }
 
@@ -209,201 +160,108 @@ restartBtn.onclick = init;
 
 // ===== 更新 =====
 function update() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0,0,canvas.width,canvas.height);
 
   // 星
   ctx.fillStyle = "#fff";
   stars.forEach(s => {
     const sy = s.y - cameraY * 0.3;
-    if (sy > canvas.height + 10) {
-      s.y -= 6000;
-      s.x = Math.random() * canvas.width;
-    }
+    if (sy > canvas.height + 10) { s.y -= 6000; s.x = Math.random() * canvas.width; }
     ctx.fillRect(s.x, sy, s.size, s.size);
   });
 
   // キラキラ更新
-  sparkles.forEach(sp => {
-    sp.y += 0.5;
-    sp.life--;
-  });
+  sparkles.forEach(sp => { sp.y += 0.5; sp.life--; });
   sparkles = sparkles.filter(sp => sp.life > 0);
-
-  // キラキラ描画
-  sparkles.forEach(sp => {
-    ctx.globalAlpha = sp.life / 30;
-    ctx.drawImage(sparkleImg, sp.x - 12, sp.y - cameraY - 12, 24, 24);
-    ctx.globalAlpha = 1;
-  });
+  sparkles.forEach(sp => { ctx.globalAlpha = sp.life / 30; ctx.drawImage(sparkleImg, sp.x - 12, sp.y - cameraY - 12, 24,24); ctx.globalAlpha = 1; });
 
   // タイトル
-  if (state === "title") {
+  if(state==="title"){
+    drawImageKeepRatio(earthImg, canvas.width/2, canvas.height-60,150);
+    drawImageKeepRatio(ebiImg, canvas.width/2, canvas.height-150,40);
 
-    // 🌍 地球（画面下）
-    drawImageKeepRatio(earthImg, canvas.width / 2, canvas.height - 60, 150);
+    ctx.fillStyle="#fff";
+    const title="えび、月へ行く";
+    ctx.font="28px serif";
+    ctx.fillText(title,(canvas.width-ctx.measureText(title).width)/2,250);
 
-    // 🍤 えび（地球の上）
-    drawImageKeepRatio(ebiImg, canvas.width / 2, canvas.height - 150, 40);
-
-    // タイトル文字
-    ctx.fillStyle = "#fff";
-    const title = "えび、月へ行く";
-    ctx.font = "28px serif";
-    const textWidth = ctx.measureText(title).width;
-    ctx.fillText(title, (canvas.width - textWidth) / 2, 250);
-
-    const subtitle = "クリックでジャンプ！";
-    ctx.font = "16px sans-serif";
-    const subWidth = ctx.measureText(subtitle).width;
-    ctx.fillText(subtitle, (canvas.width - subWidth) / 2, 300);
-
+    const subtitle="クリックでジャンプ！";
+    ctx.font="16px sans-serif";
+    ctx.fillText(subtitle,(canvas.width-ctx.measureText(subtitle).width)/2,300);
     requestAnimationFrame(update);
     return;
   }
 
   // プレイ
-  if (state === "play") {
-    ebi.vy += 0.6;
-    ebi.y += ebi.vy;
-
-    plates.forEach(p => {
-      if (ebi.x + ebi.w > p.x && ebi.x < p.x + p.w &&
-          ebi.y + ebi.h > p.y && ebi.y + ebi.h < p.y + 10 && ebi.vy > 0) {
-        ebi.y = p.y - ebi.h;
-        ebi.vy = 0;
-        ebi.jumping = false;
+  if(state==="play"){
+    ebi.vy+=0.6; ebi.y+=ebi.vy;
+    plates.forEach(p=>{
+      if(ebi.x+ebi.w>p.x && ebi.x<p.x+p.w && ebi.y+ebi.h>p.y && ebi.y+ebi.h<p.y+10 && ebi.vy>0){
+        ebi.y=p.y-ebi.h; ebi.vy=0; ebi.jumping=false;
       }
     });
 
-    if (ebi.y + ebi.h > moon.y && ebi.y + ebi.h < moon.y + 20 &&
-        Math.abs(ebi.x + 20 - moon.x) < 100) {
-      state = "ending1";
-      message = "ついた……！月だ……！";
-      messageTimer = 180;
-      bgm1.pause();
+    if(ebi.y+ebi.h>moon.y && ebi.y+ebi.h<moon.y+20 && Math.abs(ebi.x+20-moon.x)<100){
+      state="ending1"; message="ついた……！月だ……！"; messageTimer=180; bgm1.pause();
     }
 
-    cameraY = Math.min(cameraY, ebi.y - 300);
+    cameraY = Math.min(cameraY,ebi.y-300);
   }
 
-  if (state === "ending1" && --messageTimer <= 0) {
-    state = "ending2";
-    message = "……あれ？";
-    messageTimer = 180;
-  }
+  // ending1～3 従来どおり
+  if(state==="ending1" && --messageTimer<=0){ state="ending2"; message="……あれ？"; messageTimer=180; }
+  if(state==="ending2" && --messageTimer<=0){ state="ending3"; }
+  if(state==="ending3"){ moon.r+=0.8; if(moon.r>=moon.targetR){ moon.r=moon.targetR; state="ending4"; message="ここは…？（月に触ってみよう）"; } }
 
-  if (state === "ending2" && --messageTimer <= 0) {
-    state = "ending3";
-  }
-
-  if (state === "ending3") {
-    moon.r += 0.8;
-    if (moon.r >= moon.targetR) {
-      moon.r = moon.targetR;
-      state = "ending4";
-      message = "そうか……ここは銀のさらだったんだ……";
-
-    // BGM2再生（ラストでだけ）
-    const promise = bgm2.play();
-    if (promise !== undefined) {
-      promise.catch(e => {
-        console.log("スマホでBGM2再生できず:", e);
-      });
-    }
-      
-      restartBtn.style.display = "block";
+  // UFO
+  if(state==="play"){
+    const screenY=ufo.y-cameraY;
+    if(screenY>-100 && screenY<canvas.height+100){ ufoAppeared=true; ufo.float+=0.05; ufo.sway+=0.03;
+      ctx.globalAlpha=0.9;
+      drawImageKeepRatio(ufoImg,ufo.baseX+Math.sin(ufo.sway)*10,ufo.y-cameraY+Math.sin(ufo.float)*6,60);
+      ctx.globalAlpha=1;
     }
   }
 
-  // ===== UFO演出（左端フラフラ） =====
-  if (state === "play") {
-    const screenY = ufo.y - cameraY;
-    if (screenY > -100 && screenY < canvas.height + 100) {
-      if (!ufoAppeared) {
-        ufoAppeared = true;
+  // 流れ星
+  shootingStars.forEach(star=>{ star.x+=star.vx; star.y+=star.vy; star.life--; drawImageKeepRatio(starImg,star.x,star.y,40); });
+  shootingStars=shootingStars.filter(s=>s.life>0);
+
+  // 月描画
+  ctx.fillStyle="#ccddee"; ctx.beginPath(); ctx.arc(moon.x,moon.y-cameraY,moon.r,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle="rgba(0,0,0,0.1)"; ctx.beginPath(); ctx.arc(moon.x-10,moon.y-cameraY-10,moon.r,0,Math.PI*2); ctx.fill();
+
+  // ending4/5演出
+  if(state==="ending4" || state==="ending5"){
+    if(state==="ending5"){
+      const max = moon.r*1.2; const r = logoImg.width/logoImg.height;
+      let w=max,h=max/r; if(h>max){h=max; w=max*r;}
+      const logoOffsetY=0;
+      ctx.drawImage(logoImg,moon.x-w/2,moon.y-cameraY-h/2-logoOffsetY,w,h);
+
+      const total=makiImgs.length+sushiImgs.length;
+      for(let i=0;i<total;i++){
+        const img=i%2===0 ? makiImgs[Math.floor(i/2)%makiImgs.length] : sushiImgs[Math.floor(i/2)%sushiImgs.length];
+        const a=Math.PI*2/total*i;
+        drawImageKeepRatio(img,moon.x+Math.cos(a)*SUSHI_RADIUS,moon.y-cameraY+Math.sin(a)*SUSHI_RADIUS,38);
       }
 
-      ufo.float += 0.05;
-      ufo.sway += 0.03;
-
-      const floatY = Math.sin(ufo.float) * 6;
-      const swayX = Math.sin(ufo.sway) * 10;
-
-      ctx.globalAlpha = 0.9;
-      drawImageKeepRatio(ufoImg, ufo.baseX + swayX, ufo.y - cameraY + floatY, 60);
-      ctx.globalAlpha = 1;
+      ctx.font="24px serif"; ctx.fillStyle="#fff"; ctx.fillText("― 寿司の惑星 ―",110,120);
+      restartBtn.style.display="block";
     }
   }
 
-  // ===== 流れ星（複数） =====
-  shootingStars.forEach((star) => {
-    star.x += star.vx;
-    star.y += star.vy;
-    star.life--;
-
-    drawImageKeepRatio(starImg, star.x, star.y, 40);
-  });
-
-  shootingStars = shootingStars.filter(star => star.life > 0);
-
-  // 月（銀のさら）描画：青みグレー＋影
-  ctx.fillStyle = "#ccddee";
-  ctx.beginPath();
-  ctx.arc(moon.x, moon.y - cameraY, moon.r, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.fillStyle = "rgba(0,0,0,0.1)";
-  ctx.beginPath();
-  ctx.arc(moon.x - 10, moon.y - cameraY - 10, moon.r, 0, Math.PI * 2);
-  ctx.fill();
-
-  // ラスト演出
-  if (state === "ending4") {
-    const max = moon.r * 1.2;
-    const r = logoImg.width / logoImg.height;
-    let w = max, h = max / r;
-    if (h > max) { h = max; w = max * r; }
-
-    // GinxDOTOWNの位置調整
-    const logoOffsetY = 0;
-    ctx.drawImage(logoImg, moon.x - w / 2, moon.y - cameraY - h / 2 - logoOffsetY, w, h);
-
-    const total = makiImgs.length + sushiImgs.length;
-    for (let i = 0; i < total; i++) {
-      const img = i % 2 === 0
-        ? makiImgs[Math.floor(i / 2) % makiImgs.length]
-        : sushiImgs[Math.floor(i / 2) % sushiImgs.length];
-      const a = Math.PI * 2 / total * i;
-
-      drawImageKeepRatio(
-        img,
-        moon.x + Math.cos(a) * SUSHI_RADIUS,
-        moon.y - cameraY + Math.sin(a) * SUSHI_RADIUS,
-        38
-      );
-    }
-
-    ctx.font = "24px serif";
-    ctx.fillStyle = "#fff";
-    ctx.fillText("― 寿司の惑星 ―", 110, 120);
-  }
-
-  // えび
-  const ebiOffsetY = state === "ending4" ? -moon.r * 0.2 : 0;
-  drawImageKeepRatio(
-    ebiImg,
-    ebi.x + ebi.w / 2,
-    ebi.y - cameraY + ebi.h / 2 + ebiOffsetY,
-    42
-  );
+  // えび描画
+  const ebiOffsetY=(state==="ending4"||state==="ending5")?-moon.r*0.2:0;
+  drawImageKeepRatio(ebiImg,ebi.x+ebi.w/2,ebi.y-cameraY+ebi.h/2+ebiOffsetY,42);
 
   // セリフ
-  if (message) {
-    ctx.fillStyle = "rgba(0,0,0,0.6)";
-    ctx.fillRect(20, canvas.height - 90, 360, 50);
-    ctx.fillStyle = "#fff";
-    ctx.font = "16px sans-serif";
-    ctx.fillText(message, 40, canvas.height - 58);
+  if(message){
+    ctx.fillStyle="rgba(0,0,0,0.6)";
+    ctx.fillRect(20,canvas.height-90,360,50);
+    ctx.fillStyle="#fff";
+    ctx.font="16px sans-serif";
+    ctx.fillText(message,40,canvas.height-58);
   }
 
   requestAnimationFrame(update);
