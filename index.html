@@ -160,10 +160,17 @@ function init() {
 function startOrJump() {
   if (state === "title") {
     state = "play";
+
+    // ユーザー操作に紐づけて BGM2 を準備
+    bgm2.play().then(() => {
+      bgm2.pause();
+      bgm2.currentTime = 0;
+    }).catch(e => console.log("BGM2準備できず:", e));
+
     bgm1.play();
     return;
   }
-
+    
   if (!ebi.jumping && state === "play") {
 
     // 流れ星
