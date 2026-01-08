@@ -248,10 +248,16 @@ function update() {
     // タイトル文字
     ctx.fillStyle = "#fff";
     ctx.font = "28px serif";
-    ctx.fillText("えび、月へ行く", 90, 250);
+    const title = "えび、月へ行く";
+    ctx.font = "28px serif";
+    const textWidth = ctx.measureText(title).width;
+    ctx.fillText(title, (canvas.width - textWidth) / 2, 250);
 
     ctx.font = "16px sans-serif";
-    ctx.fillText("クリックでジャンプ！", 120, 300);
+    const subtitle = "クリックでジャンプ！";
+    ctx.font = "16px sans-serif";
+    const subWidth = ctx.measureText(subtitle).width;
+    ctx.fillText(subtitle, (canvas.width - subWidth) / 2, 300);
 
     requestAnimationFrame(update);
     return;
